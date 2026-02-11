@@ -1,0 +1,106 @@
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Premium Designer Job Portal - Color System */
+  --bg-primary: #FAFAF9;
+  --bg-card: #FFFFFF;
+  --bg-tag: #F5F5F4;
+  --bg-filter-active: #F5F5F4;
+  
+  --border-primary: #E7E5E4;
+  --border-hover: #D6D3D1;
+  --border-filter-active: #D6D3D1;
+  
+  --text-primary: #1C1917;
+  --text-secondary: #44403C;
+  --text-tertiary: #78716C;
+  --text-muted: #A8A29E;
+  --text-tag: #57534E;
+  
+  --accent-primary: #0F172A;
+  --accent-hover: #1E293B;
+  
+  /* Legacy tokens for compatibility */
+  --font-size: 16px;
+  --background: #FAFAF9;
+  --foreground: #1C1917;
+  --card: #FFFFFF;
+  --card-foreground: #1C1917;
+  --popover: #FFFFFF;
+  --popover-foreground: #1C1917;
+  --primary: #0F172A;
+  --primary-foreground: #FFFFFF;
+  --secondary: #F5F5F4;
+  --secondary-foreground: #1C1917;
+  --muted: #F5F5F4;
+  --muted-foreground: #78716C;
+  --accent: #F5F5F4;
+  --accent-foreground: #1C1917;
+  --destructive: #d4183d;
+  --destructive-foreground: #ffffff;
+  --border: #E7E5E4;
+  --input: transparent;
+  --input-background: #FFFFFF;
+  --switch-background: #cbced4;
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+  --ring: #0F172A;
+  --radius: 0.75rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-input-background: var(--input-background);
+  --color-switch-background: var(--switch-background);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-[#FAFAF9] text-[#1C1917];
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  html {
+    font-size: var(--font-size);
+  }
+}
+
+/* Mobile Tracker Card Accordion Animation */
+@keyframes expandCard {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
