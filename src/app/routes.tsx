@@ -7,7 +7,7 @@ import { LoginScreen } from "./pages/LoginScreen";
 import { InternalJobs } from "./pages/InternalJobs";
 import { ShareInternalRole } from "./pages/ShareInternalRole";
 
-// Protected route wrapper
+// Protected route wrapper (KEEP for later use)
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const isLoggedIn =
     localStorage.getItem("designers_colony_auth") === "true";
@@ -32,22 +32,24 @@ export const router = createBrowserRouter([
         path: "jobs",
         Component: Jobs,
       },
+
+      // ✅ COMMUNITY PAGE — PUBLIC
       {
         path: "community",
-        element: (
-          <ProtectedRoute>
-            <InternalJobs />
-          </ProtectedRoute>
-        ),
+        Component: InternalJobs,
       },
+
       {
         path: "tracker",
         Component: Tracker,
       },
+
       {
         path: "login",
         Component: LoginScreen,
       },
+
+      // 🔒 KEEP THIS PROTECTED (optional / later use)
       {
         path: "internal-jobs",
         element: (
@@ -56,13 +58,11 @@ export const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+
+      // ✅ SHARE ROLE — PUBLIC
       {
         path: "community/share",
-        element: (
-          <ProtectedRoute>
-            <ShareInternalRole />
-          </ProtectedRoute>
-        ),
+        Component: ShareInternalRole,
       },
     ],
   },
