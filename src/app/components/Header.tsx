@@ -26,66 +26,30 @@ export function Header() {
 
           {/* Desktop Navigation - Hidden on mobile */}
           <div className="hidden sm:flex items-center gap-8">
-            {isLoggedIn && (
-              <nav className="flex items-center gap-6">
-                <Link
-                  to="/"
-                  className={`text-[15px] font-medium transition-colors duration-150 ${
-                    location.pathname === '/' 
-                      ? 'text-[#1C1917]' 
-                      : 'text-[#78716C] hover:text-[#1C1917]'
-                  }`}
-                >
-                  Jobs
-                </Link>
-                <Link
-                  to="/community"
-                  className={`text-[15px] font-medium transition-colors duration-150 ${
-                    location.pathname.startsWith('/community')
-                      ? 'text-[#1C1917]' 
-                      : 'text-[#78716C] hover:text-[#1C1917]'
-                  }`}
-                >
-                  Community
-                </Link>
-                <Link
-                  to="/tracker"
-                  className={`text-[15px] font-medium transition-colors duration-150 ${
-                    location.pathname === '/tracker' 
-                      ? 'text-[#1C1917]' 
-                      : 'text-[#78716C] hover:text-[#1C1917]'
-                  }`}
-                >
-                  Tracker
-                </Link>
-              </nav>
-            )}
-            
-            {!isLoggedIn && location.pathname === '/' && (
-              <nav className="flex items-center gap-6">
-                <Link
-                  to="/community"
-                  className="text-[14px] font-medium text-[#78716C] hover:text-[#1C1917] transition-colors duration-150"
-                >
-                  Community
-                </Link>
-                <Link
-                  to="/tracker"
-                  className="text-[14px] font-medium text-[#78716C] hover:text-[#1C1917] transition-colors duration-150"
-                >
-                  Tracker
-                </Link>
-              </nav>
-            )}
-
-            {isLoggedIn && (
-              <button
-                onClick={logout}
-                className="text-[14px] font-medium text-[#78716C] hover:text-[#1C1917] transition-colors duration-150"
+            <nav className="flex items-center gap-6">
+              <Link
+                to="/"
+                className={`text-[15px] font-medium transition-colors duration-150 ${
+                  location.pathname === '/' 
+                    ? 'text-[#1C1917]' 
+                    : 'text-[#78716C] hover:text-[#1C1917]'
+                }`}
               >
-                Sign out
-              </button>
-            )}
+                Jobs
+              </Link>
+              <Link
+                to="/community"
+                className={`text-[15px] font-medium transition-colors duration-150 ${
+                  // Highlight for both /community and /internal-jobs routes
+                  location.pathname.startsWith('/community') ||
+                  location.pathname.startsWith('/internal-jobs')
+                    ? 'text-[#1C1917]' 
+                    : 'text-[#78716C] hover:text-[#1C1917]'
+                }`}
+              >
+                Community
+              </Link>
+            </nav>
           </div>
 
           {/* Mobile Hamburger Icon */}
@@ -124,81 +88,32 @@ export function Header() {
           {/* Menu Panel */}
           <div className="sm:hidden fixed top-[56px] left-0 right-0 z-40 bg-white border-b border-[#E7E5E4] shadow-lg">
             <nav className="px-6 py-4 space-y-1">
-              {isLoggedIn ? (
-                <>
-                  <Link
-                    to="/"
-                    onClick={closeMenu}
-                    className={`block px-4 py-3 rounded-lg text-[15px] font-medium transition-colors ${
-                      location.pathname === '/'
-                        ? 'bg-[#F5F5F4] text-[#1C1917]'
-                        : 'text-[#78716C] hover:bg-[#FAFAF9] hover:text-[#1C1917]'
-                    }`}
-                  >
-                    Jobs
-                  </Link>
-                  <Link
-                    to="/community"
-                    onClick={closeMenu}
-                    className={`block px-4 py-3 rounded-lg text-[15px] font-medium transition-colors ${
-                      location.pathname.startsWith('/community')
-                        ? 'bg-[#F5F5F4] text-[#1C1917]'
-                        : 'text-[#78716C] hover:bg-[#FAFAF9] hover:text-[#1C1917]'
-                    }`}
-                  >
-                    Community
-                  </Link>
-                  <Link
-                    to="/tracker"
-                    onClick={closeMenu}
-                    className={`block px-4 py-3 rounded-lg text-[15px] font-medium transition-colors ${
-                      location.pathname === '/tracker'
-                        ? 'bg-[#F5F5F4] text-[#1C1917]'
-                        : 'text-[#78716C] hover:bg-[#FAFAF9] hover:text-[#1C1917]'
-                    }`}
-                  >
-                    Tracker
-                  </Link>
-                  
-                  {/* Divider */}
-                  <div className="h-px bg-[#E7E5E4] my-2" />
-                  
-                  <button
-                    onClick={() => {
-                      logout();
-                      closeMenu();
-                    }}
-                    className="block w-full text-left px-4 py-3 rounded-lg text-[15px] font-medium text-[#78716C] hover:bg-[#FAFAF9] hover:text-[#1C1917] transition-colors"
-                  >
-                    Sign out
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link
-                    to="/community"
-                    onClick={closeMenu}
-                    className={`block px-4 py-3 rounded-lg text-[15px] font-medium transition-colors ${
-                      location.pathname.startsWith('/community')
-                        ? 'bg-[#F5F5F4] text-[#1C1917]'
-                        : 'text-[#78716C] hover:bg-[#FAFAF9] hover:text-[#1C1917]'
-                    }`}
-                  >
-                    Community
-                  </Link>
-                  <Link
-                    to="/tracker"
-                    onClick={closeMenu}
-                    className={`block px-4 py-3 rounded-lg text-[15px] font-medium transition-colors ${
-                      location.pathname === '/tracker'
-                        ? 'bg-[#F5F5F4] text-[#1C1917]'
-                        : 'text-[#78716C] hover:bg-[#FAFAF9] hover:text-[#1C1917]'
-                    }`}
-                  >
-                    Tracker
-                  </Link>
-                </>
-              )}
+              <>
+                <Link
+                  to="/"
+                  onClick={closeMenu}
+                  className={`block px-4 py-3 rounded-lg text-[15px] font-medium transition-colors ${
+                    location.pathname === '/'
+                      ? 'bg-[#F5F5F4] text-[#1C1917]'
+                      : 'text-[#78716C] hover:bg-[#FAFAF9] hover:text-[#1C1917]'
+                  }`}
+                >
+                  Jobs
+                </Link>
+                <Link
+                  to="/community"
+                  onClick={closeMenu}
+                  className={`block px-4 py-3 rounded-lg text-[15px] font-medium transition-colors ${
+                    // Highlight for both /community and /internal-jobs routes
+                    location.pathname.startsWith('/community') ||
+                    location.pathname.startsWith('/internal-jobs')
+                      ? 'bg-[#F5F5F4] text-[#1C1917]'
+                      : 'text-[#78716C] hover:bg-[#FAFAF9] hover:text-[#1C1917]'
+                  }`}
+                >
+                  Community
+                </Link>
+              </>
             </nav>
           </div>
         </>

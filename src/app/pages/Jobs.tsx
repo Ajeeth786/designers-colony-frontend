@@ -1,12 +1,16 @@
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+
 import { PageTitle } from '../components/PageTitle';
 import { FilterBar } from '../components/FilterBar';
 import { JobList } from '../components/JobList';
 import { LoadMoreButton } from '../components/LoadMoreButton';
 import { Footer } from '../components/Footer';
 import { JobsLoadingSkeleton } from '../components/JobCardSkeleton';
-import { useEffect, useState } from 'react';
+
 import type { Job } from '../../data/job.types';
 import { mapApiJobToJob } from '../../data/job.mapper';
+import { supabase } from '../../lib/supabase';
 
 const JOBS_PER_PAGE = 12;
 
@@ -22,30 +26,51 @@ export function Jobs() {
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
-  // ✅ FILTER STATE
-  const [filters, setFilters] = useState<Filters>({
-    location: null,
-    experienceLevel: null,
-    workMode: null,
-  });
+  // ✅ URL search params
+  const [searchParams, setSearchParams] = useSearchParams();
 
+  // ✅ INIT filters FROM URL (on first load)
+  const [filters, setFilters] = useState<Filters>(() => ({
+    location: searchParams.get('location'),
+    experienceLevel: searchParams.get('experienceLevel'),
+    workMode: searchParams.get('workMode'),
+  }));
+
+  // ✅ FETCH JOBS (server-side filtering)
   useEffect(() => {
     async function fetchJobs() {
       try {
         setIsLoading(true);
 
-        const res = await fetch(
-          'https://designers-colony-backend.vercel.app/api/jobs?page=1&limit=1000'
-        );
-        const json = await res.json();
+        const location = filters.location?.trim() || null;
+        const experience = filters.experienceLevel?.toLowerCase() || null;
+        const workMode = filters.workMode?.toLowerCase() || null;
 
-        if (!json.success) {
-          throw new Error('Failed to fetch jobs');
+        let query = supabase
+          .from('jobs')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (location) {
+          query = query.ilike('location', `%${location}%`);
         }
 
-        setJobs(
-          (Array.isArray(json.jobs) ? json.jobs : []).map(mapApiJobToJob)
-        );
+        if (experience) {
+          query = query.eq('experience_level', experience);
+        }
+
+        if (workMode) {
+          query = query.eq('work_mode', workMode);
+        }
+
+        const { data, error } = await query;
+
+        if (error) {
+          console.error('Supabase error:', error);
+          return;
+        }
+
+        setJobs((data ?? []).map(mapApiJobToJob));
       } catch (err) {
         console.error(err);
       } finally {
@@ -55,9 +80,21 @@ export function Jobs() {
     }
 
     fetchJobs();
-  }, []);
+  }, [filters.location, filters.experienceLevel, filters.workMode]);
 
-  // ✅ FILTER HANDLER (used by FilterBar)
+  // ✅ SYNC filters → URL (FINAL STEP)
+  useEffect(() => {
+    const params: Record<string, string> = {};
+
+    if (filters.location) params.location = filters.location;
+    if (filters.experienceLevel)
+      params.experienceLevel = filters.experienceLevel;
+    if (filters.workMode) params.workMode = filters.workMode;
+
+    setSearchParams(params);
+  }, [filters, setSearchParams]);
+
+  // ✅ FILTER HANDLER
   const handleFilterChange = (
     type: keyof Filters,
     value: string | null
@@ -67,44 +104,29 @@ export function Jobs() {
       [type]: value,
     }));
 
-    // Reset pagination on filter change
     setVisibleCount(JOBS_PER_PAGE);
   };
 
-  // ✅ APPLY FILTERS
-  const filteredJobs = jobs.filter((job) => {
-    if (filters.location && job.location !== filters.location) return false;
-    if (
-      filters.experienceLevel &&
-      job.experienceLevel !== filters.experienceLevel
-    )
-      return false;
-    if (filters.workMode && job.workMode !== filters.workMode) return false;
-
-    return true;
-  });
-
-  // ✅ PAGINATION AFTER FILTERING
-  const visibleJobs = filteredJobs.slice(0, visibleCount);
-  const hasMore = visibleCount < filteredJobs.length;
+  // ✅ PAGINATION
+  const visibleJobs = jobs.slice(0, visibleCount);
+  const hasMore = visibleCount < jobs.length;
 
   const handleLoadMore = () => {
     if (isLoading) return;
     setVisibleCount((prev) =>
-      Math.min(prev + JOBS_PER_PAGE, filteredJobs.length)
+      Math.min(prev + JOBS_PER_PAGE, jobs.length)
     );
   };
 
   return (
     <div className="min-h-screen bg-[#FAFAF9]">
-      <main className="sm:max-w-[1120px] sm:mx-auto px-6 sm:px-6 md:px-10 lg:px-10 xl:px-20 pt-[72px] sm:pt-[80px]">
+      <main className="sm:max-w-[1120px] sm:mx-auto px-6 sm:px-6 md:px-10 lg:px-10 xl:px-20 pt-[88px] sm:pt-[96px]">
         <PageTitle />
-
         <FilterBar onFilterChange={handleFilterChange} />
 
         {isInitialLoad ? (
           <JobsLoadingSkeleton />
-        ) : filteredJobs.length === 0 ? (
+        ) : jobs.length === 0 ? (
           <div className="mb-10 text-center text-[14px] sm:text-[15px] text-[#A8A29E]">
             No roles match your filters.
           </div>
@@ -116,7 +138,7 @@ export function Jobs() {
               <LoadMoreButton
                 onClick={handleLoadMore}
                 showing={visibleCount}
-                total={filteredJobs.length}
+                total={jobs.length}
                 isLoading={isLoading}
               />
             )}
