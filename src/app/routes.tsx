@@ -1,23 +1,14 @@
-import { createBrowserRouter, Navigate } from "react-router";
+import { createBrowserRouter } from "react-router";
 import { Layout } from "./components/Layout";
 
 import { Jobs } from "./pages/Jobs";
 import { Tracker } from "./pages/Tracker";
-import { LoginScreen } from "./pages/LoginScreen";
 import { InternalJobs } from "./pages/InternalJobs";
 import { ShareInternalRole } from "./pages/ShareInternalRole";
 
-// Protected route wrapper (KEEP for later use)
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const isLoggedIn =
-    localStorage.getItem("designers_colony_auth") === "true";
-
-  if (!isLoggedIn) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return <>{children}</>;
-}
+import ChaiTalks from "./pages/ChaiTalks";
+import CreateChaiTalk from "./pages/CreateChaiTalk";
+import ChaiTalkDetail from "./pages/ChaiTalkDetail";
 
 export const router = createBrowserRouter([
   {
@@ -33,36 +24,44 @@ export const router = createBrowserRouter([
         Component: Jobs,
       },
 
-      // ✅ COMMUNITY PAGE — PUBLIC
+      /* ======================
+         COMMUNITY — PUBLIC
+      ====================== */
       {
         path: "community",
         Component: InternalJobs,
       },
-
-      {
-        path: "tracker",
-        Component: Tracker,
-      },
-
-      {
-        path: "login",
-        Component: LoginScreen,
-      },
-
-      // 🔒 KEEP THIS PROTECTED (optional / later use)
-      {
-        path: "internal-jobs",
-        element: (
-          <ProtectedRoute>
-            <InternalJobs />
-          </ProtectedRoute>
-        ),
-      },
-
-      // ✅ SHARE ROLE — PUBLIC
       {
         path: "community/share",
         Component: ShareInternalRole,
+      },
+
+      /* ======================
+         CHAI TALKS — PUBLIC
+      ====================== */
+      {
+        path: "chai-talks",
+        Component: ChaiTalks,
+      },
+      {
+        path: "chai-talks/create",
+        Component: CreateChaiTalk,
+      },
+      {
+        path: "chai-talks/:id",
+        Component: ChaiTalkDetail,
+      },
+      {
+        path: "chai-talks/:id/edit",
+        Component: CreateChaiTalk,
+      },
+
+      /* ======================
+         TRACKER — PUBLIC (for now)
+      ====================== */
+      {
+        path: "tracker",
+        Component: Tracker,
       },
     ],
   },

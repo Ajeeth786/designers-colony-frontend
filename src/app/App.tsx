@@ -1,11 +1,6 @@
 import { RouterProvider } from 'react-router';
-import { router } from './routes.tsx';
-import { AuthProvider } from './hooks/useAuth.tsx';
+import { router } from './routes';
 
 export default function App() {
-  return (
-    <AuthProvider>
-      <RouterProvider router={router} />
-    </AuthProvider>
-  );
+  return <RouterProvider router={router} />;
 }

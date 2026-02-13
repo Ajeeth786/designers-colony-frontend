@@ -1,27 +1,27 @@
-import { FormEvent, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import type { InternalJob } from './InternalJobs';
+import { FormEvent, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import type { InternalJob } from "./InternalJobs";
 
-const STORAGE_KEY = 'designerscolony_internal_jobs';
+const STORAGE_KEY = "designerscolony_internal_jobs";
 
 type FormState = {
   company: string;
   role: string;
   location: string;
-  workMode: 'Remote' | 'Hybrid' | 'Onsite';
+  workMode: "Remote" | "Hybrid" | "Onsite";
   experienceRange: string;
   howToApply: string;
   shortNote: string;
 };
 
 const initialFormState: FormState = {
-  company: '',
-  role: '',
-  location: '',
-  workMode: 'Remote',
-  experienceRange: '',
-  howToApply: '',
-  shortNote: '',
+  company: "",
+  role: "",
+  location: "",
+  workMode: "Remote",
+  experienceRange: "",
+  howToApply: "",
+  shortNote: "",
 };
 
 export function ShareInternalRole() {
@@ -30,10 +30,7 @@ export function ShareInternalRole() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleChange = (
-    field: keyof FormState,
-    value: string
-  ) => {
+  const handleChange = (field: keyof FormState, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -42,7 +39,7 @@ export function ShareInternalRole() {
     setError(null);
 
     if (!form.company || !form.role || !form.location || !form.howToApply) {
-      setError('Please fill in all required fields.');
+      setError("Please fill in all required fields.");
       return;
     }
 
@@ -61,18 +58,19 @@ export function ShareInternalRole() {
         experienceRange: form.experienceRange.trim() || undefined,
         howToApply: form.howToApply.trim(),
         shortNote: form.shortNote.trim() || undefined,
-        sharedBy: 'Community member',
+        sharedBy: "Community member",
         sharedDate: new Date().toLocaleDateString(),
         isVerified: false,
       };
 
-      const updated = [newJob, ...existing];
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify([newJob, ...existing])
+      );
 
-      navigate('/internal-jobs');
-    } catch (err) {
-      console.error(err);
-      setError('Something went wrong while saving. Please try again.');
+      navigate("/internal-jobs");
+    } catch {
+      setError("Something went wrong while saving. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -80,143 +78,191 @@ export function ShareInternalRole() {
 
   return (
     <div className="min-h-screen bg-[#FAFAF9]">
-      <main className="sm:max-w-[720px] sm:mx-auto px-6 sm:px-6 md:px-10 lg:px-10 xl:px-0 pt-[72px] sm:pt-[80px] pb-16">
-        <header className="mt-4 sm:mt-8 mb-6 sm:mb-8">
-          <h1 className="text-[22px] sm:text-[28px] font-semibold text-[#1C1917] mb-2">
-            Share an internal role
-          </h1>
-          <p className="text-[13px] sm:text-[14px] text-[#78716C] max-w-[520px]">
-            Share an open role from your company with fellow designers. Please
-            avoid posting public job board links – this space is for internal or
-            lesser-known opportunities.
-          </p>
-        </header>
+      <main className="pt-[56px] sm:pt-[80px]">
+        <div className="max-w-[1120px] mx-auto px-6 md:px-10 pb-24">
 
-        <form
-          onSubmit={handleSubmit}
-          className="rounded-2xl border border-[#E7E5E4] bg-white p-5 sm:p-6 space-y-5"
-        >
-          {error && (
-            <div className="text-[13px] text-[#B91C1C] bg-[#FEF2F2] border border-[#FECACA] rounded-lg px-3 py-2">
-              {error}
-            </div>
-          )}
-
-          <div className="space-y-1.5">
-            <label className="block text-[13px] font-medium text-[#1C1917]">
-              Company name<span className="text-[#DC2626]">*</span>
-            </label>
-            <input
-              type="text"
-              value={form.company}
-              onChange={(e) => handleChange('company', e.target.value)}
-              className="w-full h-10 rounded-lg border border-[#E7E5E4] bg-white px-3 text-[13px] outline-none focus:ring-2 focus:ring-[#1C1917] focus:border-[#1C1917]"
-              placeholder="Where is this role open?"
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="block text-[13px] font-medium text-[#1C1917]">
-              Role title<span className="text-[#DC2626]">*</span>
-            </label>
-            <input
-              type="text"
-              value={form.role}
-              onChange={(e) => handleChange('role', e.target.value)}
-              className="w-full h-10 rounded-lg border border-[#E7E5E4] bg-white px-3 text-[13px] outline-none focus:ring-2 focus:ring-[#1C1917] focus:border-[#1C1917]"
-              placeholder="e.g. Product Designer, Design Manager"
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="block text-[13px] font-medium text-[#1C1917]">
-              Location<span className="text-[#DC2626]">*</span>
-            </label>
-            <input
-              type="text"
-              value={form.location}
-              onChange={(e) => handleChange('location', e.target.value)}
-              className="w-full h-10 rounded-lg border border-[#E7E5E4] bg-white px-3 text-[13px] outline-none focus:ring-2 focus:ring-[#1C1917] focus:border-[#1C1917]"
-              placeholder="City, country or region"
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="block text-[13px] font-medium text-[#1C1917]">
-              Work mode<span className="text-[#DC2626]">*</span>
-            </label>
-            <div className="flex gap-2">
-              {(['Remote', 'Hybrid', 'Onsite'] as const).map((mode) => (
-                <button
-                  key={mode}
-                  type="button"
-                  onClick={() => handleChange('workMode', mode)}
-                  className={`flex-1 h-9 rounded-lg border text-[12px] sm:text-[13px] ${
-                    form.workMode === mode
-                      ? 'border-[#1C1917] bg-[#1C1917] text-white'
-                      : 'border-[#E7E5E4] bg-white text-[#44403C]'
-                  }`}
-                >
-                  {mode}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="block text-[13px] font-medium text-[#1C1917]">
-              Experience range
-            </label>
-            <input
-              type="text"
-              value={form.experienceRange}
-              onChange={(e) => handleChange('experienceRange', e.target.value)}
-              className="w-full h-10 rounded-lg border border-[#E7E5E4] bg-white px-3 text-[13px] outline-none focus:ring-2 focus:ring-[#1C1917] focus:border-[#1C1917]"
-              placeholder="e.g. 2–4 years, 6–10 years, Any level"
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="block text-[13px] font-medium text-[#1C1917]">
-              Short note
-            </label>
-            <textarea
-              value={form.shortNote}
-              onChange={(e) => handleChange('shortNote', e.target.value)}
-              className="w-full min-h-[80px] rounded-lg border border-[#E7E5E4] bg-white px-3 py-2 text-[13px] outline-none focus:ring-2 focus:ring-[#1C1917] focus:border-[#1C1917] resize-y"
-              placeholder="Add any helpful context you’d like to share with the community."
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="block text-[13px] font-medium text-[#1C1917]">
-              How to apply<span className="text-[#DC2626]">*</span>
-            </label>
-            <textarea
-              value={form.howToApply}
-              onChange={(e) => handleChange('howToApply', e.target.value)}
-              className="w-full min-h-[120px] rounded-lg border border-[#E7E5E4] bg-white px-3 py-2 text-[13px] outline-none focus:ring-2 focus:ring-[#1C1917] focus:border-[#1C1917] resize-y"
-              placeholder="Share clear steps on how to apply. This can include an internal referral form, email, or a private link."
-            />
-          </div>
-
-          <div className="flex items-center justify-between pt-2">
-            <p className="text-[11px] sm:text-[12px] text-[#A8A29E] max-w-[360px]">
-              By sharing, you confirm that this is a genuine role and that
-              you’re comfortable sharing it with the Designers Colony community.
+          {/* Page header */}
+          <header className="mb-10 max-w-[640px]">
+            <h1 className="mb-2 text-[28px] font-semibold text-[#1C1917] sm:text-[32px]">
+              Share an internal role
+            </h1>
+            <p className="text-[15px] leading-[1.6] text-[#78716C]">
+              Share an open role from your company with fellow designers.
+              Please avoid posting public job board links.
             </p>
+          </header>
 
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="inline-flex items-center h-10 px-5 rounded-lg bg-[#1C1917] text-white text-[13px] sm:text-[14px] disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {isSubmitting ? 'Sharing…' : 'Share role'}
-            </button>
-          </div>
-        </form>
+          {/* Form */}
+          <form
+            onSubmit={handleSubmit}
+            className="max-w-[640px] space-y-6 rounded-2xl border border-[#E7E5E4] bg-white p-6"
+          >
+            {error && (
+              <div className="rounded-lg border border-[#FECACA] bg-[#FEF2F2] px-3 py-2 text-[13px] text-[#B91C1C]">
+                {error}
+              </div>
+            )}
+
+            <Input
+              label="Company name"
+              required
+              value={form.company}
+              placeholder="Where is this role open?"
+              onChange={(v) => handleChange("company", v)}
+            />
+
+            <Input
+              label="Role title"
+              required
+              value={form.role}
+              placeholder="e.g. Product Designer"
+              onChange={(v) => handleChange("role", v)}
+            />
+
+            <Input
+              label="Location"
+              required
+              value={form.location}
+              placeholder="City, country or region"
+              onChange={(v) => handleChange("location", v)}
+            />
+
+            {/* Work mode */}
+            <div className="space-y-1.5">
+              <label className="text-[13px] font-medium text-[#1C1917]">
+                Work mode<span className="text-[#DC2626]">*</span>
+              </label>
+              <div className="flex flex-wrap gap-3">
+                {(["Remote", "Hybrid", "Onsite"] as const).map((mode) => {
+                  const active = form.workMode === mode;
+                  return (
+                    <button
+                      key={mode}
+                      type="button"
+                      onClick={() => handleChange("workMode", mode)}
+                      className={`h-10 rounded-full px-6 text-[14px] font-medium
+                        ${
+                          active
+                            ? "bg-[#1C1917] text-white"
+                            : "border border-[#E7E5E4] text-[#78716C]"
+                        }`}
+                    >
+                      {mode}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <Input
+              label="Experience range"
+              value={form.experienceRange}
+              placeholder="e.g. 2–4 years"
+              onChange={(v) => handleChange("experienceRange", v)}
+            />
+
+            <Textarea
+              label="Short note"
+              value={form.shortNote}
+              placeholder="Any helpful context for designers"
+              minHeight={80}
+              onChange={(v) => handleChange("shortNote", v)}
+            />
+
+            <Textarea
+              label="How to apply"
+              required
+              value={form.howToApply}
+              placeholder="Email, referral form, or private link"
+              minHeight={120}
+              onChange={(v) => handleChange("howToApply", v)}
+            />
+
+            {/* CTA block — MATCHES CREATE CHAI TALK */}
+            <div className="pt-4">
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="h-11 w-full rounded-full bg-[#1C1917] text-[14px] font-semibold text-white hover:bg-[#292524] disabled:opacity-60"
+              >
+                {isSubmitting ? "Sharing…" : "Share role"}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => navigate("/internal-jobs")}
+                className="mt-3 w-full text-[13px] text-[#78716C]"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+
+        </div>
       </main>
     </div>
   );
 }
 
+/* ---------- Helpers ---------- */
+
+function Input({
+  label,
+  value,
+  placeholder,
+  required,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  placeholder?: string;
+  required?: boolean;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <label className="text-[13px] font-medium text-[#1C1917]">
+        {label}
+        {required && <span className="text-[#DC2626]">*</span>}
+      </label>
+      <input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="h-11 w-full rounded-lg border border-[#E7E5E4] px-3 text-[14px]"
+        placeholder={placeholder}
+      />
+    </div>
+  );
+}
+
+function Textarea({
+  label,
+  value,
+  placeholder,
+  minHeight,
+  required,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  placeholder?: string;
+  minHeight: number;
+  required?: boolean;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <label className="text-[13px] font-medium text-[#1C1917]">
+        {label}
+        {required && <span className="text-[#DC2626]">*</span>}
+      </label>
+      <textarea
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        style={{ minHeight }}
+        className="w-full rounded-lg border border-[#E7E5E4] px-3 py-2 text-[14px]"
+        placeholder={placeholder}
+      />
+    </div>
+  );
+}

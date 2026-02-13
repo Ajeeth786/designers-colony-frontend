@@ -26,17 +26,14 @@ export function Jobs() {
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
-  // ✅ URL search params
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // ✅ INIT filters FROM URL (on first load)
   const [filters, setFilters] = useState<Filters>(() => ({
     location: searchParams.get('location'),
     experienceLevel: searchParams.get('experienceLevel'),
     workMode: searchParams.get('workMode'),
   }));
 
-  // ✅ FETCH JOBS (server-side filtering)
   useEffect(() => {
     async function fetchJobs() {
       try {
@@ -51,17 +48,9 @@ export function Jobs() {
           .select('*')
           .order('created_at', { ascending: false });
 
-        if (location) {
-          query = query.ilike('location', `%${location}%`);
-        }
-
-        if (experience) {
-          query = query.eq('experience_level', experience);
-        }
-
-        if (workMode) {
-          query = query.eq('work_mode', workMode);
-        }
+        if (location) query = query.ilike('location', `%${location}%`);
+        if (experience) query = query.eq('experience_level', experience);
+        if (workMode) query = query.eq('work_mode', workMode);
 
         const { data, error } = await query;
 
@@ -82,10 +71,8 @@ export function Jobs() {
     fetchJobs();
   }, [filters.location, filters.experienceLevel, filters.workMode]);
 
-  // ✅ SYNC filters → URL (FINAL STEP)
   useEffect(() => {
     const params: Record<string, string> = {};
-
     if (filters.location) params.location = filters.location;
     if (filters.experienceLevel)
       params.experienceLevel = filters.experienceLevel;
@@ -94,7 +81,6 @@ export function Jobs() {
     setSearchParams(params);
   }, [filters, setSearchParams]);
 
-  // ✅ FILTER HANDLER
   const handleFilterChange = (
     type: keyof Filters,
     value: string | null
@@ -103,11 +89,9 @@ export function Jobs() {
       ...prev,
       [type]: value,
     }));
-
     setVisibleCount(JOBS_PER_PAGE);
   };
 
-  // ✅ PAGINATION
   const visibleJobs = jobs.slice(0, visibleCount);
   const hasMore = visibleCount < jobs.length;
 
@@ -120,30 +104,32 @@ export function Jobs() {
 
   return (
     <div className="min-h-screen bg-[#FAFAF9]">
-      <main className="sm:max-w-[1120px] sm:mx-auto px-6 sm:px-6 md:px-10 lg:px-10 xl:px-20 pt-[88px] sm:pt-[96px]">
-        <PageTitle />
-        <FilterBar onFilterChange={handleFilterChange} />
+      <main className="pt-[56px] sm:pt-[80px]">
+        <div className="max-w-[1120px] mx-auto px-6 md:px-10">
+          <PageTitle />
+          <FilterBar onFilterChange={handleFilterChange} />
 
-        {isInitialLoad ? (
-          <JobsLoadingSkeleton />
-        ) : jobs.length === 0 ? (
-          <div className="mb-10 text-center text-[14px] sm:text-[15px] text-[#A8A29E]">
-            No roles match your filters.
-          </div>
-        ) : (
-          <>
-            <JobList jobs={visibleJobs} />
+          {isInitialLoad ? (
+            <JobsLoadingSkeleton />
+          ) : jobs.length === 0 ? (
+            <div className="mt-12 mb-16 text-center text-[14px] sm:text-[15px] text-[#A8A29E]">
+              No roles match your filters.
+            </div>
+          ) : (
+            <>
+              <JobList jobs={visibleJobs} />
 
-            {hasMore && (
-              <LoadMoreButton
-                onClick={handleLoadMore}
-                showing={visibleCount}
-                total={jobs.length}
-                isLoading={isLoading}
-              />
-            )}
-          </>
-        )}
+              {hasMore && (
+                <LoadMoreButton
+                  onClick={handleLoadMore}
+                  showing={visibleCount}
+                  total={jobs.length}
+                  isLoading={isLoading}
+                />
+              )}
+            </>
+          )}
+        </div>
       </main>
 
       <Footer />
