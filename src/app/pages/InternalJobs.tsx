@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { InternalJobList } from "../components/InternalJobList";
-import communityEmptyImg from "../../assets/images/community-roles-empty.png";
+import communityEmptyImg from "../../assets/images/chai-talks-community-empty-rbg.png.png";
 
 export interface InternalJob {
   id: string;

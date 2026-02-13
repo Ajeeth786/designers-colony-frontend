@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import emptyStateImg from "../../assets/images/chai-talks-empty.png";
+import emptyStateImg from "../../assets/images/chai-talks-empty-rbg.png.png";
 
 export type ChaiTalk = {
   id: string;
