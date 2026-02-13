@@ -2,7 +2,6 @@ import { createBrowserRouter } from "react-router";
 import { Layout } from "./components/Layout";
 
 import { Jobs } from "./pages/Jobs";
-import { Tracker } from "./pages/Tracker";
 import { InternalJobs } from "./pages/InternalJobs";
 import { ShareInternalRole } from "./pages/ShareInternalRole";
 
@@ -54,14 +53,6 @@ export const router = createBrowserRouter([
       {
         path: "chai-talks/:id/edit",
         Component: CreateChaiTalk,
-      },
-
-      /* ======================
-         TRACKER — PUBLIC (for now)
-      ====================== */
-      {
-        path: "tracker",
-        Component: Tracker,
       },
     ],
   },
