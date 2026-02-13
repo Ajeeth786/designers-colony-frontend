@@ -4,15 +4,38 @@ import type { InternalJob } from "./InternalJobs";
 
 const STORAGE_KEY = "designerscolony_internal_jobs";
 
+/* ---------- Types ---------- */
+
+type WorkMode = "Remote" | "Hybrid" | "Onsite";
+
 type FormState = {
   company: string;
   role: string;
   location: string;
-  workMode: "Remote" | "Hybrid" | "Onsite";
+  workMode: WorkMode;
   experienceRange: string;
   howToApply: string;
   shortNote: string;
 };
+
+type InputProps = {
+  label: string;
+  value: string;
+  placeholder?: string;
+  required?: boolean;
+  onChange: (value: string) => void;
+};
+
+type TextareaProps = {
+  label: string;
+  value: string;
+  placeholder?: string;
+  minHeight: number;
+  required?: boolean;
+  onChange: (value: string) => void;
+};
+
+/* ---------- Initial state ---------- */
 
 const initialFormState: FormState = {
   company: "",
@@ -24,17 +47,20 @@ const initialFormState: FormState = {
   shortNote: "",
 };
 
+/* ---------- Page ---------- */
+
 export function ShareInternalRole() {
   const navigate = useNavigate();
   const [form, setForm] = useState<FormState>(initialFormState);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const handleChange = (field: keyof FormState, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = (event: FormEvent) => {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
 
@@ -59,7 +85,7 @@ export function ShareInternalRole() {
         howToApply: form.howToApply.trim(),
         shortNote: form.shortNote.trim() || undefined,
         sharedBy: "Community member",
-        sharedDate: new Date().toLocaleDateString(),
+        sharedDate: "Today",
         isVerified: false,
       };
 
@@ -68,7 +94,11 @@ export function ShareInternalRole() {
         JSON.stringify([newJob, ...existing])
       );
 
-      navigate("/internal-jobs");
+      setShowSuccess(true);
+
+      setTimeout(() => {
+        navigate("/community", { replace: true });
+      }, 1200);
     } catch {
       setError("Something went wrong while saving. Please try again.");
     } finally {
@@ -76,23 +106,41 @@ export function ShareInternalRole() {
     }
   };
 
+  /* ---------- Success ---------- */
+
+  if (showSuccess) {
+    return (
+      <div className="min-h-screen bg-[#FAFAF9] flex items-center justify-center px-6">
+        <div className="text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#F5F5F4]">
+            ✓
+          </div>
+          <p className="text-[15px] text-[#78716C]">
+            Role shared successfully 🎉
+            <br />
+            Redirecting…
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  /* ---------- Form ---------- */
+
   return (
     <div className="min-h-screen bg-[#FAFAF9]">
       <main className="pt-[56px] sm:pt-[80px]">
         <div className="max-w-[1120px] mx-auto px-6 md:px-10 pb-24">
 
-          {/* Page header */}
           <header className="mb-10 max-w-[640px]">
             <h1 className="mb-2 text-[28px] font-semibold text-[#1C1917] sm:text-[32px]">
               Share an internal role
             </h1>
             <p className="text-[15px] leading-[1.6] text-[#78716C]">
               Share an open role from your company with fellow designers.
-              Please avoid posting public job board links.
             </p>
           </header>
 
-          {/* Form */}
           <form
             onSubmit={handleSubmit}
             className="max-w-[640px] space-y-6 rounded-2xl border border-[#E7E5E4] bg-white p-6"
@@ -107,7 +155,6 @@ export function ShareInternalRole() {
               label="Company name"
               required
               value={form.company}
-              placeholder="Where is this role open?"
               onChange={(v) => handleChange("company", v)}
             />
 
@@ -115,7 +162,6 @@ export function ShareInternalRole() {
               label="Role title"
               required
               value={form.role}
-              placeholder="e.g. Product Designer"
               onChange={(v) => handleChange("role", v)}
             />
 
@@ -123,48 +169,40 @@ export function ShareInternalRole() {
               label="Location"
               required
               value={form.location}
-              placeholder="City, country or region"
               onChange={(v) => handleChange("location", v)}
             />
 
-            {/* Work mode */}
             <div className="space-y-1.5">
               <label className="text-[13px] font-medium text-[#1C1917]">
                 Work mode<span className="text-[#DC2626]">*</span>
               </label>
               <div className="flex flex-wrap gap-3">
-                {(["Remote", "Hybrid", "Onsite"] as const).map((mode) => {
-                  const active = form.workMode === mode;
-                  return (
-                    <button
-                      key={mode}
-                      type="button"
-                      onClick={() => handleChange("workMode", mode)}
-                      className={`h-10 rounded-full px-6 text-[14px] font-medium
-                        ${
-                          active
-                            ? "bg-[#1C1917] text-white"
-                            : "border border-[#E7E5E4] text-[#78716C]"
-                        }`}
-                    >
-                      {mode}
-                    </button>
-                  );
-                })}
+                {(["Remote", "Hybrid", "Onsite"] as const).map((mode) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    onClick={() => handleChange("workMode", mode)}
+                    className={`h-10 rounded-full px-6 text-[14px] font-medium ${
+                      form.workMode === mode
+                        ? "bg-[#1C1917] text-white"
+                        : "border border-[#E7E5E4] text-[#78716C]"
+                    }`}
+                  >
+                    {mode}
+                  </button>
+                ))}
               </div>
             </div>
 
             <Input
               label="Experience range"
               value={form.experienceRange}
-              placeholder="e.g. 2–4 years"
               onChange={(v) => handleChange("experienceRange", v)}
             />
 
             <Textarea
               label="Short note"
               value={form.shortNote}
-              placeholder="Any helpful context for designers"
               minHeight={80}
               onChange={(v) => handleChange("shortNote", v)}
             />
@@ -173,31 +211,18 @@ export function ShareInternalRole() {
               label="How to apply"
               required
               value={form.howToApply}
-              placeholder="Email, referral form, or private link"
               minHeight={120}
               onChange={(v) => handleChange("howToApply", v)}
             />
 
-            {/* CTA block — MATCHES CREATE CHAI TALK */}
-            <div className="pt-4">
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="h-11 w-full rounded-full bg-[#1C1917] text-[14px] font-semibold text-white hover:bg-[#292524] disabled:opacity-60"
-              >
-                {isSubmitting ? "Sharing…" : "Share role"}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => navigate("/internal-jobs")}
-                className="mt-3 w-full text-[13px] text-[#78716C]"
-              >
-                Cancel
-              </button>
-            </div>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="h-11 w-full rounded-full bg-[#1C1917] text-white disabled:opacity-60"
+            >
+              {isSubmitting ? "Sharing…" : "Share role"}
+            </button>
           </form>
-
         </div>
       </main>
     </div>
@@ -212,13 +237,7 @@ function Input({
   placeholder,
   required,
   onChange,
-}: {
-  label: string;
-  value: string;
-  placeholder?: string;
-  required?: boolean;
-  onChange: (v: string) => void;
-}) {
+}: InputProps) {
   return (
     <div className="space-y-1.5">
       <label className="text-[13px] font-medium text-[#1C1917]">
@@ -242,14 +261,7 @@ function Textarea({
   minHeight,
   required,
   onChange,
-}: {
-  label: string;
-  value: string;
-  placeholder?: string;
-  minHeight: number;
-  required?: boolean;
-  onChange: (v: string) => void;
-}) {
+}: TextareaProps) {
   return (
     <div className="space-y-1.5">
       <label className="text-[13px] font-medium text-[#1C1917]">

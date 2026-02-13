@@ -1,5 +1,5 @@
 import { useState, FormEvent } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import type { ChaiTalk } from "./ChaiTalks";
 
 const STORAGE_KEY = "designerscolony_chai_talks";
@@ -103,8 +103,8 @@ export default function CreateChaiTalk() {
     setShowSuccess(true);
 
     setTimeout(() => {
-      navigate("/chai-talks");
-    }, 1500);
+      navigate("/chai-talks", { replace: true });
+    }, 1200);
   };
 
   /* ---------- SUCCESS STATE ---------- */
@@ -142,16 +142,11 @@ export default function CreateChaiTalk() {
             </p>
           </header>
 
-          <form
-            onSubmit={handleSubmit}
-            className="max-w-[640px] space-y-6"
-          >
+          <form onSubmit={handleSubmit} className="max-w-[640px] space-y-6">
             <Input
               label="What's the topic?"
               value={formData.title}
-              onChange={(v) =>
-                setFormData({ ...formData, title: v })
-              }
+              onChange={(v) => setFormData({ ...formData, title: v })}
               error={errors.title}
               placeholder="UX Portfolio Review"
             />
@@ -161,113 +156,53 @@ export default function CreateChaiTalk() {
                 Format
               </label>
               <div className="flex flex-wrap gap-3">
-                {(["Offline", "Online", "Hybrid"] as const).map(
-                  (type) => (
-                    <button
-                      key={type}
-                      type="button"
-                      onClick={() =>
-                        setFormData({ ...formData, type })
-                      }
-                      className={`h-10 rounded-full px-6 text-[14px] font-medium transition-colors
-                        ${
-                          formData.type === type
-                            ? "bg-[#1C1917] text-white"
-                            : "border border-[#E7E5E4] text-[#78716C] hover:border-[#D6D3D1]"
-                        }`}
-                    >
-                      {type}
-                    </button>
-                  )
-                )}
+                {(["Offline", "Online", "Hybrid"] as const).map((type) => (
+                  <button
+                    key={type}
+                    type="button"
+                    onClick={() => setFormData({ ...formData, type })}
+                    className={`h-10 rounded-full px-6 text-[14px] font-medium
+                      ${
+                        formData.type === type
+                          ? "bg-[#1C1917] text-white"
+                          : "border border-[#E7E5E4] text-[#78716C]"
+                      }`}
+                  >
+                    {type}
+                  </button>
+                ))}
               </div>
             </div>
 
-            {(formData.type === "Offline" ||
-              formData.type === "Hybrid") && (
+            {(formData.type === "Offline" || formData.type === "Hybrid") && (
               <Input
                 label="City"
                 value={formData.city}
-                onChange={(v) =>
-                  setFormData({ ...formData, city: v })
-                }
+                onChange={(v) => setFormData({ ...formData, city: v })}
                 error={errors.city}
-                placeholder="Chennai / Berlin"
               />
             )}
 
-            <Input
-              label="Date"
-              value={formData.date}
-              onChange={(v) =>
-                setFormData({ ...formData, date: v })
-              }
-              error={errors.date}
-              placeholder="Saturday, Feb 15"
-            />
+            <Input label="Date" value={formData.date} onChange={(v) => setFormData({ ...formData, date: v })} error={errors.date} />
+            <Input label="Time" value={formData.time} onChange={(v) => setFormData({ ...formData, time: v })} error={errors.time} />
 
-            <Input
-              label="Time"
-              value={formData.time}
-              onChange={(v) =>
-                setFormData({ ...formData, time: v })
-              }
-              error={errors.time}
-              placeholder="4:00 PM IST"
-            />
+            <Textarea label="About this Chai Talk" value={formData.about} onChange={(v) => setFormData({ ...formData, about: v })} error={errors.about} />
+
+            <Input label="Your name" value={formData.host} onChange={(v) => setFormData({ ...formData, host: v })} error={errors.host} />
 
             <Textarea
-              label="About this Chai Talk"
-              value={formData.about}
-              onChange={(v) =>
-                setFormData({ ...formData, about: v })
-              }
-              error={errors.about}
-            />
-
-            <Input
-              label="Your name"
-              value={formData.host}
-              onChange={(v) =>
-                setFormData({ ...formData, host: v })
-              }
-              error={errors.host}
-            />
-
-            <Textarea
-              label={
-                formData.type === "Online"
-                  ? "Join link"
-                  : "Location / details"
-              }
+              label={formData.type === "Online" ? "Join link" : "Location / details"}
               value={formData.locationOrJoinLink}
               onChange={(v) =>
-                setFormData({
-                  ...formData,
-                  locationOrJoinLink: v,
-                })
+                setFormData({ ...formData, locationOrJoinLink: v })
               }
               error={errors.locationOrJoinLink}
             />
 
-            <div className="pt-4">
-              <button
-                type="submit"
-                className="h-11 w-full rounded-full bg-[#1C1917] text-[14px] font-semibold text-white hover:bg-[#292524]"
-              >
-                Create Chai Talk
-              </button>
-
-              <button
-                type="button"
-                onClick={() => navigate("/chai-talks")}
-                className="mt-3 w-full text-[13px] text-[#78716C]"
-              >
-                Cancel
-              </button>
-            </div>
+            <button type="submit" className="h-11 w-full rounded-full bg-[#1C1917] text-white">
+              Create Chai Talk
+            </button>
           </form>
-
         </div>
       </main>
     </div>
@@ -276,53 +211,32 @@ export default function CreateChaiTalk() {
 
 /* ---------- UI helpers ---------- */
 
-function Input({
-  label,
-  value,
-  onChange,
-  placeholder,
-  error,
-}: InputProps) {
+function Input({ label, value, onChange, placeholder, error }: InputProps) {
   return (
     <div className="space-y-1.5">
-      <label className="text-[13px] font-medium text-[#1C1917]">
-        {label}
-      </label>
+      <label className="text-[13px] font-medium">{label}</label>
       <input
         value={value}
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
-        className={`h-11 w-full rounded-lg border px-3 text-[14px] outline-none focus:ring-2 focus:ring-[#1C1917]
-          ${error ? "border-red-500" : "border-[#E7E5E4]"}`}
+        className="h-11 w-full rounded-lg border px-3"
       />
-      {error && (
-        <p className="text-[11px] text-red-500">{error}</p>
-      )}
+      {error && <p className="text-[11px] text-red-500">{error}</p>}
     </div>
   );
 }
 
-function Textarea({
-  label,
-  value,
-  onChange,
-  error,
-}: TextareaProps) {
+function Textarea({ label, value, onChange, error }: TextareaProps) {
   return (
     <div className="space-y-1.5">
-      <label className="text-[13px] font-medium text-[#1C1917]">
-        {label}
-      </label>
+      <label className="text-[13px] font-medium">{label}</label>
       <textarea
         value={value}
         rows={4}
         onChange={(e) => onChange(e.target.value)}
-        className={`w-full rounded-lg border px-3 py-2 text-[14px] outline-none focus:ring-2 focus:ring-[#1C1917]
-          ${error ? "border-red-500" : "border-[#E7E5E4]"}`}
+        className="w-full rounded-lg border px-3 py-2"
       />
-      {error && (
-        <p className="text-[11px] text-red-500">{error}</p>
-      )}
+      {error && <p className="text-[11px] text-red-500">{error}</p>}
     </div>
   );
 }

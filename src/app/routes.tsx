@@ -9,10 +9,13 @@ import ChaiTalks from "./pages/ChaiTalks";
 import CreateChaiTalk from "./pages/CreateChaiTalk";
 import ChaiTalkDetail from "./pages/ChaiTalkDetail";
 
+import ErrorPage from "./pages/ErrorPage";
+
 export const router = createBrowserRouter([
   {
     path: "/",
     Component: Layout,
+    errorElement: <ErrorPage />, // ✅ important
     children: [
       {
         index: true,
