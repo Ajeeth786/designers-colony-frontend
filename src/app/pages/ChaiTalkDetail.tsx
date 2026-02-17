@@ -1,129 +1,181 @@
-import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router";
+import { FormEvent, useState } from "react";
+import { useNavigate } from "react-router";
+import { supabase } from "../../lib/supabase";
 
-type ChaiTalk = {
-  id: string;
+type ChaiTalkForm = {
   title: string;
   type: "Offline" | "Online" | "Hybrid";
-  city?: string;
+  city: string;
   date: string;
   time: string;
   about: string;
-  host: string;
-  locationOrJoinLink?: string;
-  hostedBy: string;
+  hosted_by: string;
+  location_or_join_link: string;
 };
 
-const STORAGE_KEY = "designerscolony_chai_talks";
-
-export default function ChaiTalkDetail() {
+export default function CreateChaiTalk() {
   const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>();
-  const [talk, setTalk] = useState<ChaiTalk | null>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
 
-  useEffect(() => {
-    const raw = localStorage.getItem(STORAGE_KEY);
+  const [form, setForm] = useState<ChaiTalkForm>({
+    title: "",
+    type: "Offline",
+    city: "",
+    date: "",
+    time: "",
+    about: "",
+    hosted_by: "",
+    location_or_join_link: "",
+  });
 
-    if (!raw || !id) {
-      setIsLoaded(true);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    const { error } = await supabase.from("chai_talks").insert([
+      {
+        title: form.title,
+        type: form.type,
+        city: form.city || null,
+        date: form.date,
+        time: form.time,
+        about: form.about,
+        hosted_by: form.hosted_by,
+        location_or_join_link: form.location_or_join_link || null,
+      },
+    ]);
+
+    if (error) {
+      console.error(error);
+      setError("Something went wrong. Please try again.");
+      setLoading(false);
       return;
     }
 
-    const talks: ChaiTalk[] = JSON.parse(raw);
-    const found = talks.find((t) => t.id === id);
+    navigate("/chai-talks");
+  };
 
-    setTalk(found || null);
-    setIsLoaded(true);
-  }, [id]);
-
-  /* ---------- Not found state (clean exit) ---------- */
-  if (isLoaded && !talk) {
-    return (
-      <div className="min-h-screen bg-[#FAFAF9] flex flex-col items-center justify-center gap-4">
-        <p className="text-[14px] text-[#78716C]">
-          Chai Talk not found ☕
-        </p>
-        <button
-          onClick={() => navigate("/chai-talks")}
-          className="text-[13px] font-medium text-[#1C1917]"
-        >
-          ← Back to Chai Talks
-        </button>
-      </div>
-    );
-  }
-
-  if (!talk) return null;
-
-  /* ---------- Detail view ---------- */
   return (
     <div className="min-h-screen bg-[#FAFAF9]">
       <main className="pt-[56px] sm:pt-[80px]">
-        <div className="mx-auto max-w-[720px] px-6 pb-24">
+        <div className="mx-auto max-w-[640px] px-6 pb-24">
 
-          {/* Back */}
+          {/* Header */}
           <button
             onClick={() => navigate("/chai-talks")}
-            className="mb-6 text-[13px] text-[#78716C] hover:text-[#1C1917]"
+            className="mb-6 text-[13px] text-[#78716C]"
           >
             ← Back to Chai Talks
           </button>
 
-          {/* Title */}
-          <h1 className="text-[28px] font-semibold text-[#1C1917] sm:text-[32px]">
-            {talk.title}
+          <h1 className="text-[28px] font-semibold text-[#1C1917]">
+            Create a Chai Talk
           </h1>
 
-          {/* Meta */}
-          <div className="mt-2 flex items-center gap-2 text-[13px] text-[#78716C]">
-            <span className="rounded-full border border-[#E7E5E4] px-2 py-0.5">
-              {talk.type}
-            </span>
-            {talk.city && <span>· {talk.city}</span>}
-          </div>
-
           <p className="mt-1 text-[14px] text-[#78716C]">
-            {talk.date} · {talk.time}
+            Small, honest conversations over chai ☕
           </p>
 
-          {/* About */}
-          <section className="mt-8">
-            <h2 className="mb-2 text-[14px] font-medium text-[#1C1917]">
-              About this Chai Talk
-            </h2>
-            <p className="text-[14px] leading-[1.6] text-[#44403C]">
-              {talk.about}
-            </p>
-          </section>
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="mt-8 space-y-6">
 
-          {/* Host */}
-          <section className="mt-6">
-            <h2 className="mb-1 text-[14px] font-medium text-[#1C1917]">
-              Host
-            </h2>
-            <p className="text-[14px] text-[#44403C]">
-              {talk.host}
-            </p>
-          </section>
+            <input
+              name="title"
+              placeholder="Chai Talk title"
+              value={form.title}
+              onChange={handleChange}
+              required
+              className="w-full rounded-md border border-[#E7E5E4] px-3 py-2 text-[14px]"
+            />
 
-          {/* Location / Join */}
-          {talk.locationOrJoinLink && (
-            <section className="mt-6">
-              <h2 className="mb-1 text-[14px] font-medium text-[#1C1917]">
-                Location / Join details
-              </h2>
-              <p className="text-[14px] text-[#44403C]">
-                {talk.locationOrJoinLink}
-              </p>
-            </section>
-          )}
+            <select
+              name="type"
+              value={form.type}
+              onChange={handleChange}
+              className="w-full rounded-md border border-[#E7E5E4] px-3 py-2 text-[14px]"
+            >
+              <option>Offline</option>
+              <option>Online</option>
+              <option>Hybrid</option>
+            </select>
 
-          {/* Footer */}
-          <div className="mt-10 border-t border-[#E7E5E4] pt-4 text-[13px] text-[#78716C]">
-            Hosted by {talk.hostedBy}
-          </div>
+            <input
+              name="city"
+              placeholder="City (optional)"
+              value={form.city}
+              onChange={handleChange}
+              className="w-full rounded-md border border-[#E7E5E4] px-3 py-2 text-[14px]"
+            />
 
+            <div className="flex gap-4">
+              <input
+                type="date"
+                name="date"
+                value={form.date}
+                onChange={handleChange}
+                required
+                className="w-full rounded-md border border-[#E7E5E4] px-3 py-2 text-[14px]"
+              />
+              <input
+                type="time"
+                name="time"
+                value={form.time}
+                onChange={handleChange}
+                required
+                className="w-full rounded-md border border-[#E7E5E4] px-3 py-2 text-[14px]"
+              />
+            </div>
+
+            <textarea
+              name="about"
+              placeholder="What is this Chai Talk about?"
+              value={form.about}
+              onChange={handleChange}
+              required
+              rows={4}
+              className="w-full rounded-md border border-[#E7E5E4] px-3 py-2 text-[14px]"
+            />
+
+            <input
+              name="hosted_by"
+              placeholder="Hosted by"
+              value={form.hosted_by}
+              onChange={handleChange}
+              required
+              className="w-full rounded-md border border-[#E7E5E4] px-3 py-2 text-[14px]"
+            />
+
+            <input
+              name="location_or_join_link"
+              placeholder="Location or join link (optional)"
+              value={form.location_or_join_link}
+              onChange={handleChange}
+              className="w-full rounded-md border border-[#E7E5E4] px-3 py-2 text-[14px]"
+            />
+
+            {error && (
+              <p className="text-[13px] text-red-600">{error}</p>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="rounded-full bg-[#1C1917] px-6 py-2 text-[14px] font-medium text-white disabled:opacity-60"
+            >
+              {loading ? "Creating…" : "Create Chai Talk"}
+            </button>
+
+          </form>
         </div>
       </main>
     </div>

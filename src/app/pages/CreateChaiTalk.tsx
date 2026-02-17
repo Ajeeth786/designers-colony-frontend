@@ -1,8 +1,6 @@
 import { useState, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import type { ChaiTalk } from "./ChaiTalks";
-
-const STORAGE_KEY = "designerscolony_chai_talks";
+import { supabase } from "../../lib/supabase";
 
 /* ---------- Types ---------- */
 
@@ -19,26 +17,10 @@ type FormData = {
   locationOrJoinLink: string;
 };
 
-type InputProps = {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  placeholder?: string;
-  error?: string;
-};
-
-type TextareaProps = {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  error?: string;
-};
-
-/* ---------- Page ---------- */
-
 export default function CreateChaiTalk() {
   const navigate = useNavigate();
   const [showSuccess, setShowSuccess] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const [formData, setFormData] = useState<FormData>({
@@ -74,40 +56,49 @@ export default function CreateChaiTalk() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
 
-    const newTalk: ChaiTalk = {
-      id: Date.now().toString(),
-      title: formData.title.trim(),
-      type: formData.type,
-      city: formData.city.trim() || undefined,
-      date: formData.date.trim(),
-      time: formData.time.trim(),
-      about: formData.about.trim(),
-      host: formData.host.trim(),
-      locationOrJoinLink: formData.locationOrJoinLink.trim(),
-      hostedBy: formData.host.trim(),
-      createdDate: "Today",
-    };
+    try {
+      setIsSubmitting(true);
 
-    const stored = localStorage.getItem(STORAGE_KEY);
-    const talks: ChaiTalk[] = stored ? JSON.parse(stored) : [];
+      const { error } = await supabase.from("chai_talks").insert([
+        {
+          title: formData.title.trim(),
+          type: formData.type,
+          city:
+            formData.type === "Offline" || formData.type === "Hybrid"
+              ? formData.city.trim()
+              : null,
+          date: formData.date.trim(),
+          time: formData.time.trim(),
+          about: formData.about.trim(),
+          host: formData.host.trim(), // optional if exists
+          hosted_by: formData.host.trim(), // ✅ REQUIRED FIX
+          location_or_join_link: formData.locationOrJoinLink.trim(),
+        },
+      ]);
 
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify([newTalk, ...talks])
-    );
+      if (error) {
+        console.error("Supabase Insert Error:", error);
+        throw error;
+      }
 
-    setShowSuccess(true);
+      setShowSuccess(true);
 
-    setTimeout(() => {
-      navigate("/chai-talks", { replace: true });
-    }, 1200);
+      setTimeout(() => {
+        navigate("/chai-talks");
+      }, 1200);
+    } catch (err: any) {
+      console.error(err);
+      alert(err.message || "Something went wrong while creating the talk.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  /* ---------- SUCCESS STATE ---------- */
+  /* ---------- SUCCESS ---------- */
 
   if (showSuccess) {
     return (
@@ -131,8 +122,7 @@ export default function CreateChaiTalk() {
   return (
     <div className="min-h-screen bg-[#FAFAF9]">
       <main className="pt-[56px] sm:pt-[80px]">
-        <div className="max-w-[1120px] mx-auto px-6 md:px-10 pb-24">
-
+        <div className="mx-auto max-w-[1120px] px-6 md:px-10 pb-24">
           <header className="mb-10 max-w-[640px]">
             <h1 className="mb-2 text-[28px] font-semibold text-[#1C1917] sm:text-[32px]">
               Host a Chai Talk
@@ -142,39 +132,24 @@ export default function CreateChaiTalk() {
             </p>
           </header>
 
-          <form onSubmit={handleSubmit} className="max-w-[640px] space-y-6">
+          <form
+            onSubmit={handleSubmit}
+            className="max-w-[640px] rounded-2xl border border-[#E7E5E4] bg-white p-6 sm:p-8 space-y-6"
+          >
             <Input
               label="What's the topic?"
               value={formData.title}
               onChange={(v) => setFormData({ ...formData, title: v })}
               error={errors.title}
-              placeholder="UX Portfolio Review"
             />
 
-            <div className="space-y-1.5">
-              <label className="text-[13px] font-medium text-[#1C1917]">
-                Format
-              </label>
-              <div className="flex flex-wrap gap-3">
-                {(["Offline", "Online", "Hybrid"] as const).map((type) => (
-                  <button
-                    key={type}
-                    type="button"
-                    onClick={() => setFormData({ ...formData, type })}
-                    className={`h-10 rounded-full px-6 text-[14px] font-medium
-                      ${
-                        formData.type === type
-                          ? "bg-[#1C1917] text-white"
-                          : "border border-[#E7E5E4] text-[#78716C]"
-                      }`}
-                  >
-                    {type}
-                  </button>
-                ))}
-              </div>
-            </div>
+            <FormatSelector
+              selected={formData.type}
+              onChange={(type) => setFormData({ ...formData, type })}
+            />
 
-            {(formData.type === "Offline" || formData.type === "Hybrid") && (
+            {(formData.type === "Offline" ||
+              formData.type === "Hybrid") && (
               <Input
                 label="City"
                 value={formData.city}
@@ -183,15 +158,40 @@ export default function CreateChaiTalk() {
               />
             )}
 
-            <Input label="Date" value={formData.date} onChange={(v) => setFormData({ ...formData, date: v })} error={errors.date} />
-            <Input label="Time" value={formData.time} onChange={(v) => setFormData({ ...formData, time: v })} error={errors.time} />
+            <Input
+              label="Date"
+              value={formData.date}
+              onChange={(v) => setFormData({ ...formData, date: v })}
+              error={errors.date}
+            />
 
-            <Textarea label="About this Chai Talk" value={formData.about} onChange={(v) => setFormData({ ...formData, about: v })} error={errors.about} />
-
-            <Input label="Your name" value={formData.host} onChange={(v) => setFormData({ ...formData, host: v })} error={errors.host} />
+            <Input
+              label="Time"
+              value={formData.time}
+              onChange={(v) => setFormData({ ...formData, time: v })}
+              error={errors.time}
+            />
 
             <Textarea
-              label={formData.type === "Online" ? "Join link" : "Location / details"}
+              label="About this Chai Talk"
+              value={formData.about}
+              onChange={(v) => setFormData({ ...formData, about: v })}
+              error={errors.about}
+            />
+
+            <Input
+              label="Your name"
+              value={formData.host}
+              onChange={(v) => setFormData({ ...formData, host: v })}
+              error={errors.host}
+            />
+
+            <Textarea
+              label={
+                formData.type === "Online"
+                  ? "Join link"
+                  : "Location / details"
+              }
               value={formData.locationOrJoinLink}
               onChange={(v) =>
                 setFormData({ ...formData, locationOrJoinLink: v })
@@ -199,8 +199,12 @@ export default function CreateChaiTalk() {
               error={errors.locationOrJoinLink}
             />
 
-            <button type="submit" className="h-11 w-full rounded-full bg-[#1C1917] text-white">
-              Create Chai Talk
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="mt-6 w-full rounded-full bg-black py-3 text-sm font-medium text-white disabled:opacity-60"
+            >
+              {isSubmitting ? "Creating…" : "Create Chai Talk"}
             </button>
           </form>
         </div>
@@ -209,34 +213,89 @@ export default function CreateChaiTalk() {
   );
 }
 
-/* ---------- UI helpers ---------- */
+/* ---------- Components ---------- */
 
-function Input({ label, value, onChange, placeholder, error }: InputProps) {
+function FormatSelector({
+  selected,
+  onChange,
+}: {
+  selected: TalkType;
+  onChange: (type: TalkType) => void;
+}) {
   return (
-    <div className="space-y-1.5">
-      <label className="text-[13px] font-medium">{label}</label>
-      <input
-        value={value}
-        placeholder={placeholder}
-        onChange={(e) => onChange(e.target.value)}
-        className="h-11 w-full rounded-lg border px-3"
-      />
-      {error && <p className="text-[11px] text-red-500">{error}</p>}
+    <div>
+      <label className="mb-2 block text-sm font-medium text-[#1C1917]">
+        Format
+      </label>
+      <div className="flex gap-3">
+        {(["Offline", "Online", "Hybrid"] as const).map((type) => (
+          <button
+            key={type}
+            type="button"
+            onClick={() => onChange(type)}
+            className={`rounded-full px-4 py-2 text-sm ${
+              selected === type
+                ? "bg-black text-white"
+                : "border border-[#E7E5E4] text-[#1C1917]"
+            }`}
+          >
+            {type}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
 
-function Textarea({ label, value, onChange, error }: TextareaProps) {
+function Input({
+  label,
+  value,
+  onChange,
+  error,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  error?: string;
+}) {
   return (
-    <div className="space-y-1.5">
-      <label className="text-[13px] font-medium">{label}</label>
+    <div>
+      <label className="mb-2 block text-sm font-medium text-[#1C1917]">
+        {label}
+      </label>
+      <input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full rounded-xl border border-[#E7E5E4] px-4 py-3 text-sm outline-none focus:border-black"
+      />
+      {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
+    </div>
+  );
+}
+
+function Textarea({
+  label,
+  value,
+  onChange,
+  error,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  error?: string;
+}) {
+  return (
+    <div>
+      <label className="mb-2 block text-sm font-medium text-[#1C1917]">
+        {label}
+      </label>
       <textarea
         value={value}
         rows={4}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-lg border px-3 py-2"
+        className="w-full rounded-xl border border-[#E7E5E4] px-4 py-3 text-sm outline-none focus:border-black"
       />
-      {error && <p className="text-[11px] text-red-500">{error}</p>}
+      {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
     </div>
   );
 }

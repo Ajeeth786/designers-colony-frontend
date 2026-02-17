@@ -15,48 +15,20 @@ export const router = createBrowserRouter([
   {
     path: "/",
     Component: Layout,
-    errorElement: <ErrorPage />, // ✅ important
+    errorElement: <ErrorPage />,
     children: [
-      {
-        index: true,
-        Component: Jobs,
-      },
-      {
-        path: "jobs",
-        Component: Jobs,
-      },
+      { index: true, Component: Jobs },
+      { path: "jobs", Component: Jobs },
 
-      /* ======================
-         COMMUNITY — PUBLIC
-      ====================== */
-      {
-        path: "community",
-        Component: InternalJobs,
-      },
-      {
-        path: "community/share",
-        Component: ShareInternalRole,
-      },
+      /* COMMUNITY */
+      { path: "community", Component: InternalJobs },
+      { path: "community/share", Component: ShareInternalRole },
 
-      /* ======================
-         CHAI TALKS — PUBLIC
-      ====================== */
-      {
-        path: "chai-talks",
-        Component: ChaiTalks,
-      },
-      {
-        path: "chai-talks/create",
-        Component: CreateChaiTalk,
-      },
-      {
-        path: "chai-talks/:id",
-        Component: ChaiTalkDetail,
-      },
-      {
-        path: "chai-talks/:id/edit",
-        Component: CreateChaiTalk,
-      },
+      /* CHAI TALKS */
+      { path: "chai-talks", Component: ChaiTalks },
+      { path: "chai-talks/create", Component: CreateChaiTalk },
+      { path: "chai-talks/:id", Component: ChaiTalkDetail },
+      { path: "chai-talks/:id/edit", Component: CreateChaiTalk },
     ],
   },
 ]);

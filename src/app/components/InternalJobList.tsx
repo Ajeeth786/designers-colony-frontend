@@ -1,4 +1,4 @@
-import { InternalJob } from '../pages/InternalJobs';
+import type { InternalJob } from "../../data/internal-job.types";
 
 interface InternalJobListProps {
   jobs: InternalJob[];
@@ -11,8 +11,7 @@ export function InternalJobList({ jobs, onReport }: InternalJobListProps) {
       {jobs.map((job, index) => (
         <div key={job.id}>
           <InternalJobListItem job={job} onReport={onReport} />
-          
-          {/* Separator - except for last item */}
+
           {index < jobs.length - 1 && (
             <div className="h-[1px] bg-[#F0F0F0]" />
           )}
@@ -29,70 +28,57 @@ interface InternalJobListItemProps {
 
 function InternalJobListItem({ job, onReport }: InternalJobListItemProps) {
   return (
-    <div className="block w-full py-3 sm:py-5 transition-colors duration-150 hover:bg-[#FAFAF9]/50 group">
-      {/* Company Name */}
-      <div className="text-[12px] sm:text-[13px] font-normal sm:font-medium text-[#A8A29E] tracking-[0.01em] mb-1 sm:mb-1.5 leading-[16px] sm:leading-normal">
+    <div className="block w-full py-4 transition-colors duration-150 hover:bg-[#FAFAF9]/50 group">
+
+      {/* Company */}
+      <div className="text-[13px] text-[#A8A29E] mb-1">
         {job.company}
       </div>
 
-      {/* Job Title - HERO */}
-      <h2 className="text-[16px] sm:text-[20px] font-semibold text-[#1C1917] leading-[22px] sm:leading-[1.3] tracking-[-0.02em] mb-1.5 sm:mb-2.5">
+      {/* Role */}
+      <h2 className="text-[20px] font-semibold text-[#1C1917] mb-2">
         {job.role}
       </h2>
 
-      {/* Meta Info Line - Inline with dots */}
-      <div className="text-[12px] sm:text-[14px] font-normal text-[#A8A29E] leading-[16px] sm:leading-[1.5] mb-1 sm:mb-2.5">
-        {job.location} · {job.experienceRange || 'Any level'} · {job.workMode}
+      {/* Meta */}
+      <div className="text-[14px] text-[#A8A29E] mb-3">
+        {job.location} · {job.experience_range || "Any level"} · {job.work_mode}
       </div>
 
-      {/* Short Note - If available */}
-      {job.shortNote && (
-        <div className="mb-1.5 sm:mb-3 text-[12px] sm:text-[13px] font-normal text-[#78716C] leading-[16px] sm:leading-normal">
-          {job.shortNote}
+      {/* Short note */}
+      {job.short_note && (
+        <div className="mb-3 text-[14px] text-[#78716C]">
+          {job.short_note}
         </div>
       )}
 
-      {/* How to Apply - Expandable section */}
-      <details className="mb-2 sm:mb-3 group/details">
-        <summary className="cursor-pointer text-[13px] sm:text-[14px] font-medium text-[#1C1917] hover:text-[#78716C] transition-colors list-none flex items-center gap-1.5">
-          <span>How to apply</span>
-          <svg 
-            className="w-4 h-4 transition-transform duration-150 group-open/details:rotate-180" 
-            fill="none" 
-            stroke="currentColor" 
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
+      {/* How to apply */}
+      <details className="mb-3">
+        <summary className="cursor-pointer text-[14px] font-medium text-[#1C1917]">
+          How to apply
         </summary>
-        <div className="mt-2 text-[13px] sm:text-[14px] text-[#57534E] leading-[1.6] whitespace-pre-line pl-0 sm:pl-0">
-          {job.howToApply}
+        <div className="mt-2 text-[14px] text-[#57534E] whitespace-pre-line">
+          {job.how_to_apply}
         </div>
       </details>
 
-      {/* Bottom Row - Metadata */}
-      <div className="flex items-center justify-between mt-1 sm:mt-2">
-        {/* Shared Info */}
-        <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-[12px] font-normal text-[#A8A29E] leading-[14px] sm:leading-normal">
-          <span>Shared by {job.sharedBy}</span>
-          {job.isVerified && (
+      {/* Bottom Row */}
+      <div className="flex items-center justify-between text-[12px] text-[#A8A29E]">
+        <div>
+          Shared by {job.shared_by}
+          {job.is_verified && (
             <>
-              <span>·</span>
+              {" · "}
               <span className="text-[#78716C]">Verified</span>
             </>
           )}
-          <span className="hidden sm:inline">·</span>
-          <span className="hidden sm:inline">{job.sharedDate}</span>
+          {" · "}
+          {new Date(job.created_at).toLocaleDateString()}
         </div>
 
-        {/* Report Button */}
         <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onReport(job.id);
-          }}
-          className="text-[11px] sm:text-[12px] font-normal text-[#A8A29E] hover:text-[#78716C] transition-colors leading-[14px] sm:leading-normal"
-          title="Flag if this doesn't look like a genuine role"
+          onClick={() => onReport(job.id)}
+          className="hover:text-[#78716C] transition-colors"
         >
           Report
         </button>
