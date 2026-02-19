@@ -1,4 +1,6 @@
 import type { Job } from "../../data/job.types";
+import { track } from "@vercel/analytics";
+
 
 type Props = {
   job: Job;
@@ -30,13 +32,20 @@ export function JobCard({ job }: Props) {
         </span>
 
         <a
-          href={job.applyUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-[14px] font-medium text-black hover:underline transition"
-        >
-          Apply now →
-        </a>
+  href={job.applyUrl}
+  target="_blank"
+  rel="noopener noreferrer"
+  onClick={() =>
+    track("apply_click", {
+      company: job.companyName,
+      role: job.roleTitle,
+      location: job.location,
+    })
+  }
+  className="text-[14px] font-medium text-black hover:underline transition"
+>
+  Apply now →
+</a>
       </div>
     </div>
   );
