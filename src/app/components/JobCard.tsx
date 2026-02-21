@@ -1,5 +1,4 @@
 import type { Job } from "../../data/job.types";
-import { supabase } from "../../lib/supabase";
 
 type Props = {
   job: Job;
@@ -26,6 +25,22 @@ export function JobCard({ job, clicks24h }: Props) {
     const days = Math.floor(daysSincePosted);
     signal = `Posted ${days} day${days !== 1 ? "s" : ""} ago`;
   }
+
+  const handleClick = () => {
+    fetch(`${import.meta.env.VITE_SUPABASE_URL}/rest/v1/apply_clicks`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        Prefer: "return=minimal"
+      },
+      body: JSON.stringify({
+        job_id: job.id
+      }),
+      keepalive: true
+    });
+  };
 
   return (
     <div className="rounded-2xl border border-[#E7E5E4] bg-white p-6 hover:shadow-sm transition">
@@ -54,19 +69,7 @@ export function JobCard({ job, clicks24h }: Props) {
           href={job.applyUrl}
           target="_blank"
           rel="noopener noreferrer"
-          onClick={(e) => {
-            e.preventDefault();
-
-            // Insert tracking
-            supabase.from("apply_clicks").insert([
-              { job_id: job.id }
-            ]);
-
-            // Delay navigation slightly
-            setTimeout(() => {
-              window.location.href = job.applyUrl;
-            }, 200);
-          }}
+          onClick={handleClick}
           className="
             inline-flex items-center justify-center
             px-4 py-2
