@@ -54,14 +54,16 @@ export function JobCard({ job, clicks24h }: Props) {
           href={job.applyUrl}
           target="_blank"
           rel="noopener noreferrer"
-          onClick={async (e) => {
+          onClick={(e) => {
             e.preventDefault();
 
-            await supabase.from("apply_clicks").insert([
+            // Open immediately (mobile safe)
+            window.open(job.applyUrl, "_blank");
+
+            // Track click in background (no await)
+            supabase.from("apply_clicks").insert([
               { job_id: job.id }
             ]);
-
-            window.open(job.applyUrl, "_blank");
           }}
           className="
             inline-flex items-center justify-center
