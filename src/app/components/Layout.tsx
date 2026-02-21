@@ -5,20 +5,23 @@ import { useEffect } from "react";
 export function Layout() {
 
   useEffect(() => {
-    const script1 = document.createElement("script");
-    script1.src = "https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX";
-    script1.async = true;
-    document.head.appendChild(script1);
+    // Load Google Analytics script
+    const script = document.createElement("script");
+    script.src = "https://www.googletagmanager.com/gtag/js?id=G-LK96WHZGS";
+    script.async = true;
+    document.head.appendChild(script);
 
+    // Initialize GA safely (avoid TS window typing issues)
     const script2 = document.createElement("script");
     script2.innerHTML = `
       window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
+      function gtag(){window.dataLayer.push(arguments);}
       gtag('js', new Date());
-      gtag('config', 'G-XXXXXXXXXX');
+      gtag('config', 'G-LK96WHZGS');
     `;
     document.head.appendChild(script2);
-    }, []);
+
+  }, []);
 
   return (
     <>
