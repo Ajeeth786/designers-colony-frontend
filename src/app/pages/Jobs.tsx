@@ -13,7 +13,7 @@ import { mapApiJobToJob } from "../../data/job.mapper";
 import { supabase } from "../../lib/supabase";
 
 const JOBS_PER_PAGE = 12;
-const JOB_VISIBLE_DAYS = 7; // 🔥 Change this anytime
+const JOB_VISIBLE_DAYS = 7;
 
 type Filters = {
   location: string | null;
@@ -37,7 +37,7 @@ export function Jobs() {
   }));
 
   const quickCities = [
-    "Bangalore",
+    "Bengaluru",
     "Chennai",
     "Mumbai",
     "Delhi",
@@ -45,49 +45,22 @@ export function Jobs() {
     "Gurgaon",
   ];
 
-  // 🔹 Fetch Jobs
+  // ✅ Fetch once (no filter dependency)
   useEffect(() => {
     async function fetchJobs() {
       try {
         setIsLoading(true);
 
-        // 🔥 7-day rule calculation
         const visibleFromDate = new Date();
         visibleFromDate.setDate(
           visibleFromDate.getDate() - JOB_VISIBLE_DAYS
         );
 
-        let query = supabase
+        const { data, error } = await supabase
           .from("jobs")
           .select("*")
           .gte("created_at", visibleFromDate.toISOString())
           .order("created_at", { ascending: false });
-
-        // Location Filter
-        if (filters.location) {
-          query = query.ilike(
-            "location",
-            `%${filters.location}%`
-          );
-        }
-
-        // Experience Filter
-        if (filters.experienceLevel) {
-          query = query.ilike(
-            "experience_level",
-            `%${filters.experienceLevel}%`
-          );
-        }
-
-        // Work Mode Filter
-        if (filters.workMode) {
-          query = query.ilike(
-            "work_mode",
-            `%${filters.workMode}%`
-          );
-        }
-
-        const { data, error } = await query;
 
         if (error) {
           console.error(error);
@@ -102,7 +75,7 @@ export function Jobs() {
     }
 
     fetchJobs();
-  }, [filters]);
+  }, []);
 
   // 🔹 Sync URL
   useEffect(() => {
@@ -124,9 +97,36 @@ export function Jobs() {
     setVisibleCount(JOBS_PER_PAGE);
   };
 
-  const visibleJobs = jobs.slice(0, visibleCount);
-  const hasMore = visibleCount < jobs.length;
+  // ✅ Local filtering
+  const filteredJobs = jobs.filter((job) => {
+    if (
+      filters.location &&
+      !job.location?.toLowerCase().includes(filters.location.toLowerCase())
+    ) {
+      return false;
+    }
 
+    if (
+      filters.experienceLevel &&
+      job.experienceLevel !== filters.experienceLevel
+    ) {
+      return false;
+    }
+
+    if (
+      filters.workMode &&
+      job.workMode !== filters.workMode
+    ) {
+      return false;
+    }
+
+    return true;
+  });
+
+  const visibleJobs = filteredJobs.slice(0, visibleCount);
+  const hasMore = visibleCount < filteredJobs.length;
+
+  // ✅ Counts from full dataset
   const cityCounts = quickCities.reduce((acc, city) => {
     acc[city] = jobs.filter((job) =>
       job.location?.toLowerCase().includes(city.toLowerCase())
@@ -139,16 +139,13 @@ export function Jobs() {
       <main className="pt-[40px] sm:pt-[72px]">
         <div className="max-w-[1120px] mx-auto px-5 sm:px-6 md:px-10">
 
-          {/* Title */}
           <div className="mb-6 sm:mb-8">
             <PageTitle />
           </div>
 
-          {/* Filter + Chips */}
           <div className="mb-6">
             <div className="flex items-center gap-2 pb-2 overflow-x-auto no-scrollbar">
 
-              {/* Filter Toggle */}
               <button
                 onClick={() =>
                   setShowAdvancedFilters((prev) => !prev)
@@ -163,7 +160,6 @@ export function Jobs() {
                 ☰
               </button>
 
-              {/* City Chips */}
               {quickCities.map((city) => {
                 const isActive =
                   filters.location?.toLowerCase() ===
@@ -196,7 +192,6 @@ export function Jobs() {
             </div>
           </div>
 
-          {/* Advanced Filters */}
           {showAdvancedFilters && (
             <div className="mb-6 relative z-50">
               <FilterBar
@@ -206,10 +201,9 @@ export function Jobs() {
             </div>
           )}
 
-          {/* Jobs */}
           {isInitialLoad ? (
             <JobsLoadingSkeleton />
-          ) : jobs.length === 0 ? (
+          ) : filteredJobs.length === 0 ? (
             <div className="mt-14 text-center text-[14px] text-[#A8A29E]">
               No roles match your filters.
             </div>
@@ -224,7 +218,7 @@ export function Jobs() {
                       setVisibleCount((c) => c + JOBS_PER_PAGE)
                     }
                     showing={visibleCount}
-                    total={jobs.length}
+                    total={filteredJobs.length}
                     isLoading={isLoading}
                   />
                 </div>
