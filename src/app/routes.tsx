@@ -7,7 +7,6 @@ import { ShareInternalRole } from "./pages/ShareInternalRole";
 
 import ChaiTalks from "./pages/ChaiTalks";
 import CreateChaiTalk from "./pages/CreateChaiTalk";
-import ChaiTalkDetail from "./pages/ChaiTalkDetail";
 
 import ErrorPage from "./pages/ErrorPage";
 
@@ -27,7 +26,7 @@ export const router = createBrowserRouter([
       /* CHAI TALKS */
       { path: "chai-talks", Component: ChaiTalks },
       { path: "chai-talks/create", Component: CreateChaiTalk },
-      { path: "chai-talks/:id", Component: ChaiTalkDetail },
+    
       { path: "chai-talks/:id/edit", Component: CreateChaiTalk },
     ],
   },
