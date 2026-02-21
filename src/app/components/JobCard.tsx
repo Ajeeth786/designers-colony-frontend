@@ -54,20 +54,11 @@ export function JobCard({ job, clicks24h }: Props) {
           href={job.applyUrl}
           target="_blank"
           rel="noopener noreferrer"
-          onClick={async (e) => {
-            e.preventDefault();
-
-            const { error } = await supabase
+          onClick={() => {
+            // Fire and forget tracking
+            supabase
               .from("apply_clicks")
               .insert([{ job_id: job.id }]);
-
-            if (error) {
-              console.log("Insert error:", error);
-            } else {
-              console.log("Insert success");
-            }
-
-            window.open(job.applyUrl, "_blank");
           }}
           className="
             inline-flex items-center justify-center
