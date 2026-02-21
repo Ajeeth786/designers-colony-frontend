@@ -54,11 +54,18 @@ export function JobCard({ job, clicks24h }: Props) {
           href={job.applyUrl}
           target="_blank"
           rel="noopener noreferrer"
-          onClick={() => {
-            // Fire and forget tracking
-            supabase
-              .from("apply_clicks")
-              .insert([{ job_id: job.id }]);
+          onClick={(e) => {
+            e.preventDefault();
+
+            // Insert tracking
+            supabase.from("apply_clicks").insert([
+              { job_id: job.id }
+            ]);
+
+            // Delay navigation slightly
+            setTimeout(() => {
+              window.location.href = job.applyUrl;
+            }, 200);
           }}
           className="
             inline-flex items-center justify-center
