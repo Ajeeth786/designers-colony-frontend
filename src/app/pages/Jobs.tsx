@@ -42,7 +42,7 @@ export function Jobs() {
     "Mumbai",
     "Delhi",
     "Hyderabad",
-    "Gurgaon",
+    "Gurugram",
   ];
 
   // ✅ Fetch once (no filter dependency)
