@@ -32,7 +32,7 @@ const LOCATION_OPTIONS = [
   { label: "Hyderabad", value: "Hyderabad" },
   { label: "Mumbai", value: "Mumbai" },
   { label: "Delhi", value: "Delhi" },
-  { label: "Gurgaon", value: "Gurgaon" },
+  { label: "Gurugram", value: "Gurugram" },
 ];
 
 export function FilterBar({
