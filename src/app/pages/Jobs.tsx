@@ -1,4 +1,3 @@
-export const dynamic = "force-dynamic";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
@@ -11,10 +10,8 @@ import { JobsLoadingSkeleton } from "../components/JobCardSkeleton";
 
 import type { Job } from "../../data/job.types";
 import { mapApiJobToJob } from "../../data/job.mapper";
-import { supabase } from "../../lib/supabase";
 
 const JOBS_PER_PAGE = 12;
-const JOB_VISIBLE_DAYS = 7;
 
 type Filters = {
   location: string | null;
@@ -46,29 +43,24 @@ export function Jobs() {
     "Gurugram",
   ];
 
-  // ✅ Fetch once (no filter dependency)
+  // ✅ Fetch from your Vercel API (NOT Supabase directly)
   useEffect(() => {
     async function fetchJobs() {
       try {
         setIsLoading(true);
 
-        const visibleFromDate = new Date();
-        visibleFromDate.setDate(
-          visibleFromDate.getDate() - JOB_VISIBLE_DAYS
-        );
+        const response = await fetch("/api/jobs");
 
-        const { data, error } = await supabase
-          .from("jobs")
-          .select("*")
-          .gte("created_at", visibleFromDate.toISOString())
-          .order("created_at", { ascending: false });
-
-        if (error) {
-          console.error(error);
+        if (!response.ok) {
+          console.error("Failed to fetch jobs");
           return;
         }
 
+        const data = await response.json();
+
         setJobs((data ?? []).map(mapApiJobToJob));
+      } catch (err) {
+        console.error("Error fetching jobs:", err);
       } finally {
         setIsLoading(false);
         setIsInitialLoad(false);
@@ -78,7 +70,7 @@ export function Jobs() {
     fetchJobs();
   }, []);
 
-  // 🔹 Sync URL
+  // Sync URL params
   useEffect(() => {
     const params: Record<string, string> = {};
 
@@ -98,7 +90,7 @@ export function Jobs() {
     setVisibleCount(JOBS_PER_PAGE);
   };
 
-  // ✅ Local filtering
+  // Local filtering
   const filteredJobs = jobs.filter((job) => {
     if (
       filters.location &&
@@ -114,10 +106,7 @@ export function Jobs() {
       return false;
     }
 
-    if (
-      filters.workMode &&
-      job.workMode !== filters.workMode
-    ) {
+    if (filters.workMode && job.workMode !== filters.workMode) {
       return false;
     }
 
@@ -127,7 +116,6 @@ export function Jobs() {
   const visibleJobs = filteredJobs.slice(0, visibleCount);
   const hasMore = visibleCount < filteredJobs.length;
 
-  // ✅ Counts from full dataset
   const cityCounts = quickCities.reduce((acc, city) => {
     acc[city] = jobs.filter((job) =>
       job.location?.toLowerCase().includes(city.toLowerCase())
