@@ -9,7 +9,7 @@ export default async function handler(req: any, res: any) {
 
     // ✅ 7-day automatic decay rule
     const visibleFromDate = new Date()
-    visibleFromDate.setDate(visibleFromDate.getDate() - 14)
+    visibleFromDate.setDate(visibleFromDate.getDate() - 28)
 
     const { data, error } = await supabase
       .from('jobs')
