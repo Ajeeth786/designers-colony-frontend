@@ -7,6 +7,7 @@ import { JobList } from "../components/JobList";
 import { LoadMoreButton } from "../components/LoadMoreButton";
 import { Footer } from "../components/Footer";
 import { JobsLoadingSkeleton } from "../components/JobCardSkeleton";
+import AnnouncementBar from "../components/AnnouncementBar"; // <-- ADDED
 
 import type { Job } from "../../data/job.types";
 import { mapApiJobToJob } from "../../data/job.mapper";
@@ -43,7 +44,6 @@ export function Jobs() {
     "Gurugram",
   ];
 
-  // ✅ Fetch from your Vercel API (NOT Supabase directly)
   useEffect(() => {
     async function fetchJobs() {
       try {
@@ -70,7 +70,6 @@ export function Jobs() {
     fetchJobs();
   }, []);
 
-  // Sync URL params
   useEffect(() => {
     const params: Record<string, string> = {};
 
@@ -90,7 +89,6 @@ export function Jobs() {
     setVisibleCount(JOBS_PER_PAGE);
   };
 
-  // Local filtering
   const filteredJobs = jobs.filter((job) => {
     if (
       filters.location &&
@@ -125,6 +123,8 @@ export function Jobs() {
 
   return (
     <div className="min-h-screen bg-[#FAFAF9]">
+      <AnnouncementBar /> {/* <-- ADDED */}
+
       <main className="pt-[40px] sm:pt-[72px]">
         <div className="max-w-[1120px] mx-auto px-5 sm:px-6 md:px-10">
 
