@@ -18,6 +18,7 @@ const EXPERIENCE_OPTIONS = [
   { label: "Junior", value: "junior" },
   { label: "Mid", value: "mid" },
   { label: "Senior", value: "senior" },
+  { label: "Intern", value: "intern" },
 ];
 
 const WORK_MODE_OPTIONS = [
@@ -33,6 +34,7 @@ const LOCATION_OPTIONS = [
   { label: "Mumbai", value: "Mumbai" },
   { label: "Delhi", value: "Delhi" },
   { label: "Gurugram", value: "Gurugram" },
+  { label: "Pune", value: "Pune" },
 ];
 
 export function FilterBar({

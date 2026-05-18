@@ -42,6 +42,7 @@ export function Jobs() {
     "Delhi",
     "Hyderabad",
     "Gurugram",
+    "Pune",
   ];
 
   useEffect(() => {
